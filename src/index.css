@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+/* Allow Tailwind v4 to manually trigger dark mode via the 'dark' class on the HTML tag */
+@custom-variant dark (&:is(.dark *));
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased transition-colors duration-300;
+  }
+
+  .dark body {
+    @apply bg-slate-950 text-slate-50;
+  }
+}
