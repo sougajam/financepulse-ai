@@ -1,55 +1,97 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Card } from "../components/common/Card";
-import { articles } from "../data/articles";
-import { Calendar, Clock, ChevronRight } from "lucide-react";
+import { Clock, User } from "lucide-react";
+import type { Article } from "../types";
 
 export function Articles() {
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch articles from our Node.js backend when the page loads
+  useEffect(() => {
+    async function fetchArticles() {
+      try {
+        setIsLoading(true);
+        const response = await fetch("http://localhost:5000/api/articles");
+        if (!response.ok) throw new Error("Failed to fetch articles");
+
+        const data = await response.json();
+        setArticles(data);
+      } catch (err) {
+        console.error("Error loading articles:", err);
+        setError("Could not load articles. Is the backend running?");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchArticles();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-12 flex justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-12 text-center text-rose-500">
+        {error}
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-          Financial Insights
+      <div className="mb-12">
+        <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
+          Financial Intelligence
         </h1>
-        <p className="text-slate-600 dark:text-slate-400">
-          Educational articles to help you understand markets, economics, and
-          personal finance.
+        <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl">
+          Deep dives, market analysis, and educational guides to help you master
+          your wealth.
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
         {articles.map((article) => (
-          <Card
-            className="flex flex-col h-full hover:border-emerald-500 dark:hover:border-emerald-500 transition-colors"
+          <Link
             key={article.id}
+            to={`/articles/${article.slug}`}
+            className="block h-full"
           >
-            <div className="p-6 flex flex-col flex-grow">
-              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-2">
-                {article.category}
-              </span>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-3">
-                {article.title}
-              </h2>
-              <p className="text-slate-600 dark:text-slate-400 mb-4 flex-grow">
-                {article.excerpt}
-              </p>
+            <Card className="h-full hover:shadow-lg transition-all hover:-translate-y-1 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
+              <div className="p-6 flex flex-col h-full">
+                <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 mb-4 self-start">
+                  {article.category}
+                </span>
 
-              <div className="flex items-center text-xs text-slate-500 dark:text-slate-400 mb-4 space-x-4">
-                <span className="flex items-center">
-                  <Calendar className="h-3 w-3 mr-1" /> {article.publishedDate}
-                </span>
-                <span className="flex items-center">
-                  <Clock className="h-3 w-3 mr-1" /> {article.readingTime}
-                </span>
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-3 line-clamp-2">
+                  {article.title}
+                </h2>
+
+                <p className="text-slate-600 dark:text-slate-400 mb-6 line-clamp-3 flex-grow">
+                  {article.excerpt}
+                </p>
+
+                <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-100 dark:border-slate-800">
+                  <div className="flex items-center text-sm text-slate-500 dark:text-slate-400">
+                    <User className="h-4 w-4 mr-2" />
+                    {article.author}
+                  </div>
+                  <div className="flex items-center text-sm text-slate-500 dark:text-slate-400">
+                    <Clock className="h-4 w-4 mr-2" />
+                    {article.readingTime}
+                  </div>
+                </div>
               </div>
-
-              <Link
-                className="mt-auto inline-flex items-center text-sm font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300"
-                to={`/articles/${article.slug}`}
-              >
-                Read Article <ChevronRight className="h-4 w-4 ml-1" />
-              </Link>
-            </div>
-          </Card>
+            </Card>
+          </Link>
         ))}
       </div>
     </div>

@@ -1,0 +1,125 @@
+const express = require("express");
+const cors = require("cors");
+const { Pool } = require("pg");
+require("dotenv").config();
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+// Set up the database connection
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+
+pool
+  .connect()
+  .then(() => console.log("✅ Connected to PostgreSQL Database!"))
+  .catch((err) => console.error("❌ Database connection error:", err.stack));
+
+app.use(cors());
+app.use(express.json());
+
+// Basic health check
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: "success",
+    message: "FinancePulse API is running normally!",
+  });
+});
+
+// Setup Route: This creates the table and adds one article
+app.get("/api/setup", async (req, res) => {
+  try {
+    // 1. Create the table using SQL
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS articles (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        slug VARCHAR(255) UNIQUE NOT NULL,
+        category VARCHAR(100),
+        excerpt TEXT,
+        content TEXT,
+        author VARCHAR(100),
+        published_date DATE,
+        reading_time VARCHAR(50)
+      );
+    `);
+
+    // 2. Check if it's empty, and insert a test article if it is
+    const result = await pool.query("SELECT COUNT(*) FROM articles");
+    if (parseInt(result.rows[0].count) === 0) {
+      await pool.query(`
+        INSERT INTO articles (title, slug, category, excerpt, content, author, published_date, reading_time)
+        VALUES (
+          'The Power of Compound Interest', 
+          'power-of-compound-interest', 
+          'Personal Finance', 
+          'Learn why compounding is the 8th wonder of the world.', 
+          '# The Power of Compounding\n\nCompound interest is interest calculated on the initial principal...', 
+          'FinancePulse Team', 
+          '2026-08-18', 
+          '5 min read'
+        )
+      `);
+      return res.json({ message: "Table created and test article inserted!" });
+    }
+
+    res.json({ message: "Table already exists and has data." });
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .json({ error: "Database setup failed", details: err.message });
+  }
+});
+
+// 1. Fetch ALL articles (for the main Articles page)
+app.get("/api/articles", async (req, res) => {
+  try {
+    // We use AS to rename the columns so they perfectly match our React TypeScript interface
+    const result = await pool.query(`
+      SELECT 
+        id, title, slug, category, excerpt, content, author, 
+        published_date AS "publishedDate", 
+        reading_time AS "readingTime" 
+      FROM articles 
+      ORDER BY published_date DESC
+    `);
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch articles" });
+  }
+});
+
+// 2. Fetch a SINGLE article by its slug (for the Article Detail page)
+app.get("/api/articles/:slug", async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const result = await pool.query(
+      `
+      SELECT 
+        id, title, slug, category, excerpt, content, author, 
+        published_date AS "publishedDate", 
+        reading_time AS "readingTime" 
+      FROM articles 
+      WHERE slug = $1
+    `,
+      [slug],
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Article not found" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch the article" });
+  }
+});
+
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
