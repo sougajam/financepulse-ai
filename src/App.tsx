@@ -1,3 +1,5 @@
+import { SignedIn, SignedOut, RedirectToSignIn } from "@clerk/clerk-react";
+import { AdminCreate } from "./pages/AdminCreate";
 import { SIP } from "./pages/calculators/SIP";
 import { EMI } from "./pages/calculators/EMI";
 import { Inflation } from "./pages/calculators/Inflation";
@@ -35,6 +37,19 @@ function App() {
             <Route
               path="/calculators/compound-interest"
               element={<CompoundInterest />}
+            />
+            <Route
+              path="/admin/create"
+              element={
+                <>
+                  <SignedIn>
+                    <AdminCreate />
+                  </SignedIn>
+                  <SignedOut>
+                    <RedirectToSignIn />
+                  </SignedOut>
+                </>
+              }
             />
             <Route path="/calculators/inflation" element={<Inflation />} />
             <Route path="/calculators/net-worth" element={<NetWorth />} />

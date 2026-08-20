@@ -118,7 +118,48 @@ app.get("/api/articles/:slug", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch the article" });
   }
 });
+// Create a NEW article
+app.post("/api/articles", async (req, res) => {
+  try {
+    // 1. Grab the data sent from the React form
+    const { title, category, excerpt, content, author, readingTime } = req.body;
 
+    // 2. Automatically generate a URL-friendly slug from the title
+    // (e.g., "My New Post" -> "my-new-post")
+    const slug = title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)+/g, "");
+
+    // 3. Get today's date in YYYY-MM-DD format
+    const publishedDate = new Date().toISOString().split("T")[0];
+
+    // 4. Save it all to the PostgreSQL database
+    const result = await pool.query(
+      `
+      INSERT INTO articles (title, slug, category, excerpt, content, author, published_date, reading_time)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      RETURNING *;
+    `,
+      [
+        title,
+        slug,
+        category,
+        excerpt,
+        content,
+        author,
+        publishedDate,
+        readingTime,
+      ],
+    );
+
+    // 5. Send a success response back to React
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    console.error("Error creating article:", err);
+    res.status(500).json({ error: "Failed to create the article" });
+  }
+});
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
