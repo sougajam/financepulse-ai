@@ -18,6 +18,8 @@ import { AI } from "./pages/AI";
 import { Calculators } from "./pages/Calculators";
 import { Articles } from "./pages/Articles";
 import { ArticleDetail } from "./pages/ArticleDetail";
+import { AdminDashboard } from "./pages/AdminDashboard";
+import { AdminEdit } from "./pages/AdminEdit";
 
 function App() {
   return (
@@ -51,6 +53,8 @@ function App() {
                 </>
               }
             />
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/edit/:id" element={<AdminEdit />} />
             <Route path="/calculators/inflation" element={<Inflation />} />
             <Route path="/calculators/net-worth" element={<NetWorth />} />
             <Route path="/calculators/fire" element={<FIRE />} />
