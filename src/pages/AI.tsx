@@ -62,6 +62,17 @@ export function AI() {
               className="block h-full"
             >
               <Card className="h-full hover:shadow-lg transition-all hover:-translate-y-1 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
+                {/* --- IMAGE BLOCK START --- */}
+                {article.imageUrl && (
+                  <div className="w-full h-48 overflow-hidden rounded-t-xl border-b border-slate-100 dark:border-slate-800">
+                    <img
+                      src={article.imageUrl}
+                      alt={article.title}
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                )}
+                {/* --- IMAGE BLOCK END --- */}
                 <div className="p-6 flex flex-col h-full">
                   <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 mb-4 self-start">
                     {article.category}

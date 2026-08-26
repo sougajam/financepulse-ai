@@ -84,6 +84,17 @@ export function ArticleDetail() {
           <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-6 leading-tight">
             {article.title}
           </h1>
+          {/* --- HERO IMAGE START --- */}
+          {article.imageUrl && (
+            <div className="w-full h-[400px] md:h-[500px] overflow-hidden rounded-2xl mb-12 shadow-lg">
+              <img
+                src={article.imageUrl}
+                alt={article.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+          {/* --- HERO IMAGE END --- */}
 
           <div className="flex flex-wrap items-center gap-6 text-sm text-slate-500 dark:text-slate-400">
             <div className="flex items-center">

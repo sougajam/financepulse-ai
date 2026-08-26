@@ -1,4 +1,5 @@
 export interface Article {
+  imageUrl: string | undefined;
   id: string;
   title: string;
   slug: string;
@@ -10,5 +11,5 @@ export interface Article {
   updatedDate: string;
   readingTime: string;
   tags: string[];
-  mageUrl?: string;
+  imageUrl?: string;
 }
