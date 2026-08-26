@@ -14,6 +14,7 @@ export function Articles() {
     async function fetchArticles() {
       try {
         setIsLoading(true);
+        console.log("My Live API URL is:", import.meta.env.VITE_API_URL);
         const response = await fetch(
           `${import.meta.env.VITE_API_URL}/api/articles`,
         );
