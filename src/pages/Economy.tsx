@@ -12,18 +12,19 @@ export function Economy() {
     async function fetchArticles() {
       try {
         setIsLoading(true);
-        // 1. Fetch ALL articles from the database
         const response = await fetch(
           `${import.meta.env.VITE_API_URL}/api/articles`,
         );
         const data = await response.json();
 
-        // 2. Filter them so ONLY Macroeconomics show up on this page!
-        const economyArticles = data.filter(
-          (article: Article) => article.category === "Macroeconomics",
-        );
+        // SMART FILTER: Catches macroeconomics or economy
+        const filtered = data.filter((article: Article) => {
+          if (!article.category) return false;
+          const cat = article.category.toLowerCase().trim();
+          return cat === "macroeconomics" || cat === "economy";
+        });
 
-        setArticles(economyArticles);
+        setArticles(filtered);
       } catch (err) {
         console.error("Error loading articles:", err);
       } finally {
@@ -51,7 +52,6 @@ export function Economy() {
           Deep dives into the macroeconomic shifts driving the world.
         </p>
       </div>
-
       {articles.length === 0 ? (
         <p className="text-slate-500">No economy articles published yet.</p>
       ) : (

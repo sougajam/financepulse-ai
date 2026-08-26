@@ -17,12 +17,14 @@ export function Market() {
         );
         const data = await response.json();
 
-        // Filter specifically for Investing (The Market tab)
-        const marketArticles = data.filter(
-          (article: Article) => article.category === "Investing",
-        );
+        // SMART FILTER: Catches market, markets, investing, and investment
+        const filtered = data.filter((article: Article) => {
+          if (!article.category) return false;
+          const cat = article.category.toLowerCase().trim();
+          return ["market", "markets", "investing", "investment"].includes(cat);
+        });
 
-        setArticles(marketArticles);
+        setArticles(filtered);
       } catch (err) {
         console.error("Error loading articles:", err);
       } finally {
@@ -44,13 +46,12 @@ export function Market() {
     <div className="container mx-auto px-4 py-8">
       <div className="mb-12">
         <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
-          Market & Investing
+          Market Analysis
         </h1>
         <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl">
           Stock analysis, market trends, and portfolio strategies.
         </p>
       </div>
-
       {articles.length === 0 ? (
         <p className="text-slate-500">No market articles published yet.</p>
       ) : (

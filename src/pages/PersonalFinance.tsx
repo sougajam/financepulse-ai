@@ -17,12 +17,13 @@ export function PersonalFinance() {
         );
         const data = await response.json();
 
-        // Filter specifically for Personal Finance
-        const pfArticles = data.filter(
-          (article: Article) => article.category === "Personal Finance",
-        );
+        // SMART FILTER: Catches personal finance
+        const filtered = data.filter((article: Article) => {
+          if (!article.category) return false;
+          return article.category.toLowerCase().trim() === "personal finance";
+        });
 
-        setArticles(pfArticles);
+        setArticles(filtered);
       } catch (err) {
         console.error("Error loading articles:", err);
       } finally {
@@ -51,7 +52,6 @@ export function PersonalFinance() {
           lasting wealth.
         </p>
       </div>
-
       {articles.length === 0 ? (
         <p className="text-slate-500">
           No personal finance articles published yet.
