@@ -15,7 +15,7 @@ export function ArticleDetail() {
       try {
         setIsLoading(true);
         const response = await fetch(
-          `http://localhost:5000/api/articles/${slug}`,
+          `${import.meta.env.VITE_API_URL}/api/articles/${slug}`,
         );
 
         if (!response.ok) {

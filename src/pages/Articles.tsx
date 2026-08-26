@@ -14,7 +14,9 @@ export function Articles() {
     async function fetchArticles() {
       try {
         setIsLoading(true);
-        const response = await fetch("http://localhost:5000/api/articles");
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/articles`,
+        );
         if (!response.ok) throw new Error("Failed to fetch articles");
 
         const data = await response.json();
