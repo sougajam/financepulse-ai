@@ -172,7 +172,76 @@ app.post("/api/articles", async (req, res) => {
     res.status(500).json({ error: "Failed to create the article" });
   }
 });
+// ==========================================
+// NEW ADMIN ROUTES: EDIT & DELETE
+// ==========================================
 
+// DELETE an article by ID
+app.delete("/api/articles/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query(
+      "DELETE FROM articles WHERE id = $1 RETURNING *",
+      [id],
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Article not found" });
+    }
+
+    res.json({
+      message: "Article deleted successfully",
+      deletedArticle: result.rows[0],
+    });
+  } catch (err) {
+    console.error("Error deleting article:", err);
+    res.status(500).json({ error: "Failed to delete the article" });
+  }
+});
+
+// UPDATE an article by ID
+app.put("/api/articles/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, category, excerpt, content, author, readingTime, imageUrl } =
+      req.body;
+
+    // Re-generate the slug in case the title was changed
+    const slug = title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)+/g, "");
+
+    const result = await pool.query(
+      `
+      UPDATE articles 
+      SET title = $1, slug = $2, category = $3, excerpt = $4, content = $5, author = $6, reading_time = $7, image_url = $8
+      WHERE id = $9
+      RETURNING *;
+      `,
+      [
+        title,
+        slug,
+        category,
+        excerpt,
+        content,
+        author,
+        readingTime,
+        imageUrl,
+        id,
+      ],
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Article not found" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Error updating article:", err);
+    res.status(500).json({ error: "Failed to update the article" });
+  }
+});
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
