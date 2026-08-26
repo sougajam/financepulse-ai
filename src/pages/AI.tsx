@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Card } from "../components/common/Card";
-import { Clock, User } from "lucide-react";
 import type { Article } from "../types";
 
 export function AI() {

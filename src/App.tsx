@@ -10,7 +10,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "./hooks/useTheme";
 import { Layout } from "./components/layout/Layout";
 import { Home } from "./pages/Home";
-import { Markets } from "./pages/Markets";
+import { Market } from "./pages/Markets";
 import { Economy } from "./pages/Economy";
 import { PersonalFinance } from "./pages/PersonalFinance";
 import { Investing } from "./pages/Investing";
@@ -26,7 +26,7 @@ function App() {
         <Layout>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/markets" element={<Markets />} />
+            <Route path="/markets" element={<Market />} />
             <Route path="/economy" element={<Economy />} />
             <Route path="/personal-finance" element={<PersonalFinance />} />
             <Route path="/investing" element={<Investing />} />
