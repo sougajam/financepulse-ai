@@ -10,4 +10,5 @@ export interface Article {
   updatedDate: string;
   readingTime: string;
   tags: string[];
+  mageUrl?: string;
 }

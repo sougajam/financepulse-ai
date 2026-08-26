@@ -27,10 +27,10 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// Setup Route: This creates the table and adds one article
+// Setup Route: This creates the table, adds the image column, and adds one article
 app.get("/api/setup", async (req, res) => {
   try {
-    // 1. Create the table using SQL
+    // 1. Create the base table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS articles (
         id SERIAL PRIMARY KEY,
@@ -45,7 +45,12 @@ app.get("/api/setup", async (req, res) => {
       );
     `);
 
-    // 2. Check if it's empty, and insert a test article if it is
+    // 2. Add the image_url column if it doesn't already exist
+    await pool.query(
+      `ALTER TABLE articles ADD COLUMN IF NOT EXISTS image_url TEXT;`,
+    );
+
+    // 3. Check if it's empty, and insert a test article if it is
     const result = await pool.query("SELECT COUNT(*) FROM articles");
     if (parseInt(result.rows[0].count) === 0) {
       await pool.query(`
@@ -64,7 +69,9 @@ app.get("/api/setup", async (req, res) => {
       return res.json({ message: "Table created and test article inserted!" });
     }
 
-    res.json({ message: "Table already exists and has data." });
+    res.json({
+      message: "Table already exists and has data. Image column is ready.",
+    });
   } catch (err) {
     console.error(err);
     res
@@ -76,10 +83,11 @@ app.get("/api/setup", async (req, res) => {
 // 1. Fetch ALL articles (for the main Articles page)
 app.get("/api/articles", async (req, res) => {
   try {
-    // We use AS to rename the columns so they perfectly match our React TypeScript interface
+    // Included image_url AS "imageUrl"
     const result = await pool.query(`
       SELECT 
         id, title, slug, category, excerpt, content, author, 
+        image_url AS "imageUrl",
         published_date AS "publishedDate", 
         reading_time AS "readingTime" 
       FROM articles 
@@ -96,10 +104,12 @@ app.get("/api/articles", async (req, res) => {
 app.get("/api/articles/:slug", async (req, res) => {
   try {
     const { slug } = req.params;
+    // Included image_url AS "imageUrl"
     const result = await pool.query(
       `
       SELECT 
         id, title, slug, category, excerpt, content, author, 
+        image_url AS "imageUrl",
         published_date AS "publishedDate", 
         reading_time AS "readingTime" 
       FROM articles 
@@ -118,14 +128,15 @@ app.get("/api/articles/:slug", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch the article" });
   }
 });
+
 // Create a NEW article
 app.post("/api/articles", async (req, res) => {
   try {
-    // 1. Grab the data sent from the React form
-    const { title, category, excerpt, content, author, readingTime } = req.body;
+    // 1. Grab all data sent from the React form, including imageUrl
+    const { title, category, excerpt, content, author, readingTime, imageUrl } =
+      req.body;
 
     // 2. Automatically generate a URL-friendly slug from the title
-    // (e.g., "My New Post" -> "my-new-post")
     const slug = title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
@@ -134,11 +145,11 @@ app.post("/api/articles", async (req, res) => {
     // 3. Get today's date in YYYY-MM-DD format
     const publishedDate = new Date().toISOString().split("T")[0];
 
-    // 4. Save it all to the PostgreSQL database
+    // 4. Save it all to the PostgreSQL database, including image_url and $9
     const result = await pool.query(
       `
-      INSERT INTO articles (title, slug, category, excerpt, content, author, published_date, reading_time)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      INSERT INTO articles (title, slug, category, excerpt, content, author, published_date, reading_time, image_url)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *;
     `,
       [
@@ -150,6 +161,7 @@ app.post("/api/articles", async (req, res) => {
         author,
         publishedDate,
         readingTime,
+        imageUrl,
       ],
     );
 
@@ -160,6 +172,7 @@ app.post("/api/articles", async (req, res) => {
     res.status(500).json({ error: "Failed to create the article" });
   }
 });
+
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

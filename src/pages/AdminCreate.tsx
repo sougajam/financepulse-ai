@@ -7,7 +7,7 @@ export function AdminCreate() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Form state
+  // Form state updated with imageUrl
   const [formData, setFormData] = useState({
     title: "",
     category: "Personal Finance",
@@ -15,6 +15,7 @@ export function AdminCreate() {
     content: "",
     author: "FinancePulse Team",
     readingTime: "5 min read",
+    imageUrl: "",
   });
 
   const handleChange = (
@@ -54,23 +55,18 @@ export function AdminCreate() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
-      <div className="mb-8 border-b border-slate-200 dark:border-slate-800 pb-4">
-        <div className="mb-8 border-b border-slate-200 dark:border-slate-800 pb-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
-              Create New Article
-            </h1>
-            <p className="text-slate-600 dark:text-slate-400 mt-2">
-              Publish a new post directly to the database.
-            </p>
-          </div>
-
-          {/* This renders your Google profile picture and a dropdown menu */}
-          <UserButton afterSignOutUrl="/articles" />
+      {/* Cleaned up header section */}
+      <div className="mb-8 border-b border-slate-200 dark:border-slate-800 pb-4 flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+            Create New Article
+          </h1>
+          <p className="text-slate-600 dark:text-slate-400 mt-2">
+            Publish a new post directly to the database.
+          </p>
         </div>
-        <p className="text-slate-600 dark:text-slate-400 mt-2">
-          Publish a new post directly to the database.
-        </p>
+        {/* This renders your Google profile picture and a dropdown menu */}
+        <UserButton afterSignOutUrl="/articles" />
       </div>
 
       {error && (
@@ -146,6 +142,21 @@ export function AdminCreate() {
               placeholder="e.g., 6 min read"
             />
           </div>
+        </div>
+
+        {/* Added Cover Image URL Field */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-slate-900 dark:text-white">
+            Cover Image URL
+          </label>
+          <input
+            type="url"
+            name="imageUrl"
+            value={formData.imageUrl}
+            onChange={handleChange}
+            className="w-full p-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none"
+            placeholder="https://example.com/image.jpg"
+          />
         </div>
 
         <div className="space-y-2">
