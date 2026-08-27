@@ -224,8 +224,8 @@ export function WealthCalculator() {
                   width={75}
                 />
                 <Tooltip
-                  formatter={(value: number) => [
-                    formatCurrency(value),
+                  formatter={(value) => [
+                    formatCurrency(typeof value === "number" ? value : 0),
                     "Net Worth",
                   ]}
                   contentStyle={{
