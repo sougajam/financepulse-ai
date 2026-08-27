@@ -3,6 +3,11 @@ import { Link } from "react-router-dom";
 import { Card } from "../components/common/Card";
 import { Clock, User } from "lucide-react";
 import type { Article } from "../types";
+import { MarketTicker } from "../components/common/MarketTicker";
+
+// ADDED: The import for the Wealth Calculator
+// (If you saved it inside the "common" folder, change this to "../components/common/WealthCalculator")
+import { WealthCalculator } from "../components/common/WealthCalculator";
 
 export function Articles() {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -55,10 +60,14 @@ export function Articles() {
         <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
           Financial Intelligence
         </h1>
-        <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl">
+        <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mb-8">
           Deep dives, market analysis, and educational guides to help you master
           your wealth.
         </p>
+
+        {/* ADDED: Both widgets placed directly below the header text */}
+        <MarketTicker />
+        <WealthCalculator />
       </div>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">

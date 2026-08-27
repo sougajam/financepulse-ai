@@ -83,7 +83,6 @@ app.get("/api/setup", async (req, res) => {
 // 1. Fetch ALL articles (for the main Articles page)
 app.get("/api/articles", async (req, res) => {
   try {
-    // Included image_url AS "imageUrl"
     const result = await pool.query(`
       SELECT 
         id, title, slug, category, excerpt, content, author, 
@@ -104,7 +103,6 @@ app.get("/api/articles", async (req, res) => {
 app.get("/api/articles/:slug", async (req, res) => {
   try {
     const { slug } = req.params;
-    // Included image_url AS "imageUrl"
     const result = await pool.query(
       `
       SELECT 
@@ -132,20 +130,16 @@ app.get("/api/articles/:slug", async (req, res) => {
 // Create a NEW article
 app.post("/api/articles", async (req, res) => {
   try {
-    // 1. Grab all data sent from the React form, including imageUrl
     const { title, category, excerpt, content, author, readingTime, imageUrl } =
       req.body;
 
-    // 2. Automatically generate a URL-friendly slug from the title
     const slug = title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)+/g, "");
 
-    // 3. Get today's date in YYYY-MM-DD format
     const publishedDate = new Date().toISOString().split("T")[0];
 
-    // 4. Save it all to the PostgreSQL database, including image_url and $9
     const result = await pool.query(
       `
       INSERT INTO articles (title, slug, category, excerpt, content, author, published_date, reading_time, image_url)
@@ -165,16 +159,12 @@ app.post("/api/articles", async (req, res) => {
       ],
     );
 
-    // 5. Send a success response back to React
     res.status(201).json(result.rows[0]);
   } catch (err) {
     console.error("Error creating article:", err);
     res.status(500).json({ error: "Failed to create the article" });
   }
 });
-// ==========================================
-// NEW ADMIN ROUTES: EDIT & DELETE
-// ==========================================
 
 // DELETE an article by ID
 app.delete("/api/articles/:id", async (req, res) => {
@@ -206,7 +196,6 @@ app.put("/api/articles/:id", async (req, res) => {
     const { title, category, excerpt, content, author, readingTime, imageUrl } =
       req.body;
 
-    // Re-generate the slug in case the title was changed
     const slug = title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
@@ -242,6 +231,40 @@ app.put("/api/articles/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to update the article" });
   }
 });
+
+// ==========================================
+// NEW MILESTONE 5 ROUTE: ALPHA VANTAGE API
+// ==========================================
+app.get("/api/market/:symbol", async (req, res) => {
+  try {
+    const symbol = req.params.symbol;
+    const apiKey = process.env.ALPHA_VANTAGE_API_KEY;
+
+    const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${apiKey}`;
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data["Global Quote"] && data["Global Quote"]["01. symbol"]) {
+      const quote = data["Global Quote"];
+
+      res.json({
+        symbol: quote["01. symbol"],
+        price: parseFloat(quote["05. price"]).toFixed(2),
+        change: parseFloat(quote["09. change"]).toFixed(2),
+        changePercent: quote["10. change percent"].replace("%", ""),
+      });
+    } else {
+      console.log("Alpha Vantage Response:", data);
+      res
+        .status(429)
+        .json({ error: "API Limit Reached or Invalid Symbol", details: data });
+    }
+  } catch (error) {
+    console.error("Error fetching market data:", error);
+    res.status(500).json({ error: "Server error fetching market data" });
+  }
+});
+
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
