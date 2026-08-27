@@ -1,5 +1,4 @@
 export interface Article {
-  imageUrl: string | undefined;
   id: string;
   title: string;
   slug: string;
