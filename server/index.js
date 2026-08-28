@@ -233,31 +233,65 @@ app.put("/api/articles/:id", async (req, res) => {
 });
 
 // ==========================================
-// NEW MILESTONE 5 ROUTE: ALPHA VANTAGE API
+// MILESTONE 6: CACHED ALPHA VANTAGE API
 // ==========================================
+
+// Create an empty object to store our cached prices in the server's memory
+const marketCache = {};
+const CACHE_TTL = 15 * 60 * 1000; // 15 minutes in milliseconds
+
 app.get("/api/market/:symbol", async (req, res) => {
   try {
     const symbol = req.params.symbol;
-    const apiKey = process.env.ALPHA_VANTAGE_API_KEY;
+    const now = Date.now();
 
+    // 1. THE CACHE CHECK
+    // If we have data for this symbol AND it is less than 15 minutes old, send it!
+    if (
+      marketCache[symbol] &&
+      now - marketCache[symbol].timestamp < CACHE_TTL
+    ) {
+      console.log(`⚡ Serving ${symbol} directly from backend cache!`);
+      return res.json(marketCache[symbol].data);
+    }
+
+    // 2. THE API FETCH
+    // If the cache is empty or expired, ask Wall Street for fresh data
+    console.log(`🌐 Cache missed. Fetching fresh data for ${symbol}...`);
+    const apiKey = process.env.ALPHA_VANTAGE_API_KEY;
     const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${apiKey}`;
+
     const response = await fetch(url);
     const data = await response.json();
 
+    // 3. SAVE AND RESPOND
     if (data["Global Quote"] && data["Global Quote"]["01. symbol"]) {
       const quote = data["Global Quote"];
 
-      res.json({
+      const formattedData = {
         symbol: quote["01. symbol"],
         price: parseFloat(quote["05. price"]).toFixed(2),
         change: parseFloat(quote["09. change"]).toFixed(2),
         changePercent: quote["10. change percent"].replace("%", ""),
-      });
+      };
+
+      // Save the fresh data and the current time into our cache bucket
+      marketCache[symbol] = {
+        timestamp: now,
+        data: formattedData,
+      };
+
+      return res.json(formattedData);
     } else {
-      console.log("Alpha Vantage Response:", data);
-      res
-        .status(429)
-        .json({ error: "API Limit Reached or Invalid Symbol", details: data });
+      // 4. THE FALLBACK
+      // If the API blocks us (limit reached), but we have old data, serve the old data
+      if (marketCache[symbol]) {
+        console.log(`⚠️ API Limit hit. Serving STALE cache for ${symbol}`);
+        return res.json(marketCache[symbol].data);
+      }
+
+      // Total failure (No cache + API blocked)
+      res.status(429).json({ error: "API Limit Reached", details: data });
     }
   } catch (error) {
     console.error("Error fetching market data:", error);
