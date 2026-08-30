@@ -33,8 +33,10 @@ export function Home() {
         </div>
       </div>
 
-      {/* Market Snapshot */}
-      <MarketSnapshot />
+      {/* Market Snapshot - Mobile Responsive Wrapper Added */}
+      <div className="w-full overflow-hidden mb-12">
+        <MarketSnapshot />
+      </div>
 
       {/* Features Grid */}
       <section className="py-16">

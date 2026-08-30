@@ -3,6 +3,8 @@ import { createRoot } from "react-dom/client";
 import { ClerkProvider } from "@clerk/clerk-react";
 import App from "./App";
 import "./index.css";
+import { HelmetProvider } from "react-helmet-async";
+import { ErrorBoundary } from "./components/common/ErrorBoundary";
 
 // Import your publishable key from the .env file
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -13,9 +15,21 @@ if (!PUBLISHABLE_KEY) {
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    {/* This wraps your entire app in Clerk's authentication system */}
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
-      <App />
-    </ClerkProvider>
+    {/* HelmetProvider manages your SEO tags */}
+    <HelmetProvider>
+      {/* ClerkProvider manages your authentication */}
+      <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
+        <App />
+      </ClerkProvider>
+    </HelmetProvider>
+  </StrictMode>,
+);
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
+    <HelmetProvider>
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    </HelmetProvider>
   </StrictMode>,
 );

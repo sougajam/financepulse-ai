@@ -1,3 +1,4 @@
+import { SEO } from "../components/common/SEO";
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ChevronLeft, Clock, User, Calendar } from "lucide-react";
@@ -57,7 +58,6 @@ export function ArticleDetail() {
     );
   }
 
-  // Format the raw PostgreSQL date string nicely
   const formattedDate = new Date(article.publishedDate).toLocaleDateString(
     "en-IN",
     {
@@ -69,6 +69,15 @@ export function ArticleDetail() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
+      {/* --- INJECTED SEO TAGS FOR SOCIAL PLATFORMS --- */}
+      <SEO
+        title={article.title}
+        description={article.excerpt}
+        imageUrl={article.imageUrl}
+        type="article"
+        url={window.location.href}
+      />
+
       <Link
         className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400 mb-8"
         to="/articles"
@@ -84,7 +93,7 @@ export function ArticleDetail() {
           <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-6 leading-tight">
             {article.title}
           </h1>
-          {/* --- HERO IMAGE START --- */}
+
           {article.imageUrl && (
             <div className="w-full h-[400px] md:h-[500px] overflow-hidden rounded-2xl mb-12 shadow-lg">
               <img
@@ -94,7 +103,6 @@ export function ArticleDetail() {
               />
             </div>
           )}
-          {/* --- HERO IMAGE END --- */}
 
           <div className="flex flex-wrap items-center gap-6 text-sm text-slate-500 dark:text-slate-400">
             <div className="flex items-center">

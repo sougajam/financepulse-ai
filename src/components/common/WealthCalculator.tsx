@@ -13,13 +13,11 @@ import { Calculator } from "lucide-react";
 export function WealthCalculator() {
   const [currency, setCurrency] = useState<"USD" | "INR">("INR");
 
-  // Adjusted default values based on starting currency
-  const [principal, setPrincipal] = useState(100000); // 1 Lakh default
+  const [principal, setPrincipal] = useState(100000);
   const [monthlyContribution, setMonthlyContribution] = useState(10000);
   const [rate, setRate] = useState(12);
   const [years, setYears] = useState(30);
 
-  // Dynamic slider limits based on currency
   const limits = {
     principal: {
       max: currency === "INR" ? 10000000 : 1000000,
@@ -50,7 +48,6 @@ export function WealthCalculator() {
     return data;
   }, [principal, monthlyContribution, rate, years]);
 
-  // Automatically formats as $100,000 or ₹1,00,000 depending on locale
   const formatCurrency = (value: number) => {
     const locale = currency === "INR" ? "en-IN" : "en-US";
     return new Intl.NumberFormat(locale, {
@@ -60,7 +57,6 @@ export function WealthCalculator() {
     }).format(value);
   };
 
-  // Formats large axis numbers into 10K, 1M, or 10T (or Indian variants)
   const formatCompact = (value: number) => {
     const locale = currency === "INR" ? "en-IN" : "en-US";
     return new Intl.NumberFormat(locale, {
@@ -74,7 +70,8 @@ export function WealthCalculator() {
   const finalBalance = chartData[chartData.length - 1]?.balance || 0;
 
   return (
-    <div className="w-full bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 md:p-8 my-8">
+    // FIX 1: Added overflow-hidden to the main wrapper
+    <div className="w-full bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-4 md:p-8 my-8 overflow-hidden">
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div className="flex items-center space-x-3">
           <Calculator className="h-8 w-8 text-emerald-500" />
@@ -83,7 +80,6 @@ export function WealthCalculator() {
           </h2>
         </div>
 
-        {/* Currency Toggle */}
         <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg w-fit">
           <button
             onClick={() => setCurrency("INR")}
@@ -183,7 +179,8 @@ export function WealthCalculator() {
           </div>
         </div>
 
-        <div className="lg:col-span-2 flex flex-col justify-center">
+        {/* FIX 2: Added min-w-0 and overflow-hidden to grid container */}
+        <div className="lg:col-span-2 flex flex-col justify-center min-w-0 overflow-hidden">
           <div className="mb-6 text-center">
             <p className="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase tracking-wider mb-1">
               Projected Future Wealth
@@ -193,11 +190,12 @@ export function WealthCalculator() {
             </p>
           </div>
 
-          <div className="h-64 md:h-80 w-full">
+          {/* FIX 3: Added min-w-0 to chart wrapper */}
+          <div className="h-64 md:h-80 w-full min-w-0">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={chartData}
-                margin={{ top: 10, right: 10, left: 10, bottom: 0 }}
+                margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
               >
                 <defs>
                   <linearGradient id="colorBalance" x1="0" y1="0" x2="0" y2="1">
@@ -221,7 +219,7 @@ export function WealthCalculator() {
                   tickFormatter={formatCompact}
                   stroke="#64748b"
                   fontSize={12}
-                  width={75}
+                  width={60}
                 />
                 <Tooltip
                   formatter={(value) => [
