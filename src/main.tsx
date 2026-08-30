@@ -5,6 +5,7 @@ import App from "./App";
 import "./index.css";
 import { HelmetProvider } from "react-helmet-async";
 import { ErrorBoundary } from "./components/common/ErrorBoundary";
+import { Analytics } from "@vercel/analytics/react";
 
 // Import your publishable key from the .env file
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -33,3 +34,7 @@ createRoot(document.getElementById("root")!).render(
     </HelmetProvider>
   </StrictMode>,
 );
+<ErrorBoundary>
+  <App />
+  <Analytics />
+</ErrorBoundary>;
