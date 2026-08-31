@@ -4,6 +4,7 @@ import { ChevronLeft, Clock, User, Calendar } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { SEO } from "../components/common/SEO";
 import type { Article } from "../types";
+import { AdBanner } from "../components/common/AdBanner";
 
 export function ArticleDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -126,6 +127,14 @@ export function ArticleDetail() {
         </div>
 
         <div className="prose prose-slate dark:prose-invert prose-emerald max-w-none">
+          <div className="mb-8 border-b border-slate-200 dark:border-slate-800 pb-8">
+            {/* ... your title, image, and author layout ... */}
+          </div>
+          <AdBanner dataAdSlot="2831016738" />
+
+          <div className="prose prose-slate dark:prose-invert prose-emerald max-w-none">
+            <ReactMarkdown>{article.content}</ReactMarkdown>
+          </div>
           <ReactMarkdown>{article.content}</ReactMarkdown>
         </div>
       </article>
