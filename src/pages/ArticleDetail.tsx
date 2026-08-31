@@ -1,8 +1,8 @@
-import { SEO } from "../components/common/SEO";
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ChevronLeft, Clock, User, Calendar } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { SEO } from "../components/common/SEO";
 import type { Article } from "../types";
 
 export function ArticleDetail() {
@@ -67,13 +67,18 @@ export function ArticleDetail() {
     },
   );
 
+  // Ensure image URL is absolute for Facebook crawlers
+  const absoluteImageUrl = article.imageUrl?.startsWith("http")
+    ? article.imageUrl
+    : `${window.location.origin}${article.imageUrl || "/og-preview.jpg"}`;
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
-      {/* --- INJECTED SEO TAGS FOR SOCIAL PLATFORMS --- */}
+      {/* Dynamic SEO Meta Tags */}
       <SEO
         title={article.title}
         description={article.excerpt}
-        imageUrl={article.imageUrl}
+        imageUrl={absoluteImageUrl}
         type="article"
         url={window.location.href}
       />
