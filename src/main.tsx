@@ -14,27 +14,16 @@ if (!PUBLISHABLE_KEY) {
   throw new Error("Missing Clerk Publishable Key in .env file");
 }
 
+// Render the application EXACTLY ONCE
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    {/* HelmetProvider manages your SEO tags */}
     <HelmetProvider>
-      {/* ClerkProvider manages your authentication */}
       <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
-        <App />
+        <ErrorBoundary>
+          <App />
+          <Analytics />
+        </ErrorBoundary>
       </ClerkProvider>
     </HelmetProvider>
   </StrictMode>,
 );
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <HelmetProvider>
-      <ErrorBoundary>
-        <App />
-      </ErrorBoundary>
-    </HelmetProvider>
-  </StrictMode>,
-);
-<ErrorBoundary>
-  <App />
-  <Analytics />
-</ErrorBoundary>;
