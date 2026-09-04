@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown";
 import { SEO } from "../components/common/SEO";
 import type { Article } from "../types";
 import { AdBanner } from "../components/common/AdBanner";
+import SocialShare from "../components/SocialShare";
 
 export function ArticleDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -92,6 +93,7 @@ export function ArticleDetail() {
       </Link>
 
       <article className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 md:p-10">
+        {/* === ARTICLE HEADER === */}
         <div className="mb-8 border-b border-slate-200 dark:border-slate-800 pb-8">
           <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 mb-4">
             {article.category}
@@ -126,17 +128,18 @@ export function ArticleDetail() {
           </div>
         </div>
 
-        <div className="prose prose-slate dark:prose-invert prose-emerald max-w-none">
-          <div className="mb-8 border-b border-slate-200 dark:border-slate-800 pb-8">
-            {/* ... your title, image, and author layout ... */}
-          </div>
+        {/* === AD BANNER === */}
+        <div className="mb-8">
           <AdBanner dataAdSlot="2831016738" />
+        </div>
 
-          <div className="prose prose-slate dark:prose-invert prose-emerald max-w-none">
-            <ReactMarkdown>{article.content}</ReactMarkdown>
-          </div>
+        {/* === ARTICLE CONTENT === */}
+        <div className="prose prose-slate dark:prose-invert prose-emerald max-w-none mb-10">
           <ReactMarkdown>{article.content}</ReactMarkdown>
         </div>
+
+        {/* === SOCIAL SHARE BUTTONS === */}
+        <SocialShare url={window.location.href} title={article.title} />
       </article>
     </div>
   );
