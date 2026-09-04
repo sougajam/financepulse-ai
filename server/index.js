@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
 require("dotenv").config();
-
+const { autoPostToFacebook } = require("./utils/facebookPoster");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -127,7 +127,7 @@ app.get("/api/articles/:slug", async (req, res) => {
   }
 });
 
-// Create a NEW article
+/// Create a NEW article
 app.post("/api/articles", async (req, res) => {
   try {
     const { title, category, excerpt, content, author, readingTime, imageUrl } =
@@ -159,13 +159,18 @@ app.post("/api/articles", async (req, res) => {
       ],
     );
 
+    // ==========================================
+    // 🚀 NEW: Trigger Facebook Auto-Post
+    // ==========================================
+    // This runs silently in the background using the newly saved article data
+    autoPostToFacebook(result.rows[0]);
+
     res.status(201).json(result.rows[0]);
   } catch (err) {
     console.error("Error creating article:", err);
     res.status(500).json({ error: "Failed to create the article" });
   }
 });
-
 // DELETE an article by ID
 app.delete("/api/articles/:id", async (req, res) => {
   try {
