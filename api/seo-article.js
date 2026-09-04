@@ -1,6 +1,10 @@
 export default async function handler(req, res) {
   const { slug } = req.query;
-  const apiUrl = process.env.VITE_API_URL;
+
+  // NOTE: If process.env.VITE_API_URL is failing in Vercel,
+  // replace it with your actual Render URL (e.g. "https://financepulse-backend.onrender.com")
+  const apiUrl =
+    process.env.VITE_API_URL || "https://YOUR-RENDER-BACKEND.onrender.com";
 
   try {
     // 1. Fetch the specific article
@@ -13,16 +17,20 @@ export default async function handler(req, res) {
     const baseHtmlRes = await fetch(siteUrl);
     let finalHtml = await baseHtmlRes.text();
 
-    // 3. FOOLPROOF INJECTION: Insert tags right before closing </head>
+    // 3. FOOLPROOF INJECTION: Strip old tags and insert new ones
     if (article && article.title) {
       const imageToUse =
         article.imageUrl ||
         "https://financepulse-ai-pi.vercel.app/og-preview.jpg";
 
-      // Remove old title to prevent duplicates
-      finalHtml = finalHtml.replace(/<title>.*?<\/title>/i, "");
+      // A. Delete the old title to prevent duplicates
+      finalHtml = finalHtml.replace(/<title>.*?<\/title>/gi, "");
 
-      // Build the exact tags Facebook wants
+      // B. Delete ALL existing generic Open Graph and Twitter tags from index.html
+      finalHtml = finalHtml.replace(/<meta[^>]*property="og:[^>]*>/gi, "");
+      finalHtml = finalHtml.replace(/<meta[^>]*name="twitter:[^>]*>/gi, "");
+
+      // C. Build the exact, specific tags Facebook wants
       const seoTags = `
         <title>${article.title} | FinancePulse AI</title>
         <meta property="og:title" content="${article.title}" />
@@ -33,7 +41,7 @@ export default async function handler(req, res) {
         <meta name="twitter:image" content="${imageToUse}" />
       `;
 
-      // Inject tags right before </head>
+      // D. Inject the new tags right before </head>
       finalHtml = finalHtml.replace("</head>", seoTags + "</head>");
     }
 
@@ -41,6 +49,9 @@ export default async function handler(req, res) {
     res.status(200).send(finalHtml);
   } catch (error) {
     console.error("SEO Injection Error:", error);
-    res.redirect("/");
+    // Print the error to the screen instead of redirecting so we can debug if it crashes
+    res
+      .status(500)
+      .send(`SEO Function Crashed: ${error.message}. Check your API URL!`);
   }
 }
