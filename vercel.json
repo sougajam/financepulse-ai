@@ -5,7 +5,7 @@
       "destination": "/api/$1"
     },
     {
-      "source": "/article/:slug",
+      "source": "/articles/:slug",
       "destination": "/api/seo-article?slug=:slug"
     },
     {
