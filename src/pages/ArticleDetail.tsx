@@ -5,6 +5,8 @@ import ReactMarkdown from "react-markdown";
 import { SEO } from "../components/common/SEO";
 import type { Article } from "../types";
 import { AdBanner } from "../components/common/AdBanner";
+// SocialShare is a JavaScript component without a declaration file.
+// @ts-expect-error: The component is intentionally imported from JSX.
 import SocialShare from "../components/SocialShare";
 
 export function ArticleDetail() {
